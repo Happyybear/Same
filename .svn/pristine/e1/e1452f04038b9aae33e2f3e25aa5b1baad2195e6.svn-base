@@ -1,0 +1,86 @@
+//
+//  PrefixHeader.pch
+//  HYSEM
+//
+//  Created by xlc on 16/11/15.
+//  Copyright © 2016年 WGM. All rights reserved.
+//
+
+#ifndef PrefixHeader_pch
+#define PrefixHeader_pch
+
+#import "HYHeader.h"
+
+#import <UIKit/UIKit.h>
+
+#define SCREEN_H  ([UIScreen mainScreen].bounds.size.height - 64)
+#define SCREEN_W  [UIScreen mainScreen].bounds.size.width
+
+
+//一天的长度
+#define ONEDay (24*60*60)
+
+#define RGBA(r,g,b,a) [UIColor colorWithRed:(r)/255.0 green:(g)/255.0 blue:(b)/255.0 alpha:(a)]
+
+#define RGB(r, g, b)                        RGBA(r, g, b, 1.0f)
+
+#define SocketHOST @"119.163.199.218"         //服务器ip地址
+#define SocketonPort 4404                     //服务器端口号
+#define PreSocketHOST @"119.163.199.218"           //备用ip地址
+#define HY_NSusefDefaults [NSUserDefaults standardUserDefaults]
+
+
+/**
+ *  自定义单例.h
+ */
+#define DEFINE_SINGLETON_FOR_HEADER(className) \
+\
++ (className *)shared##className;
+/**
+ *  自定义单例.m
+ */
+#define DEFINE_SINGLETON_FOR_CLASS(className) \
+\
++ (className *)shared##className { \
+static className *shared##className = nil; \
+static dispatch_once_t onceToken; \
+dispatch_once(&onceToken, ^{ \
+shared##className = [[self alloc] init]; \
+}); \
+return shared##className; \
+}
+
+
+
+#if DEBUG
+#define DLog( s, ... ) NSLog( @"<%p %@:(%d)> %@", self, [[NSString stringWithUTF8String:__FILE__] lastPathComponent], __LINE__, [NSString stringWithFormat:(s), ##__VA_ARGS__] )
+#else
+#define DLog(...)
+#endif
+
+
+#define APPID       @"2017041906817095";
+
+//下载公钥
+#define PUBLICKEY @"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqSqlgt1BiO5cRkhJ/vaw1g0X9N/TBwBVMGY2Mf5sXW3WKngyiuCFBfAsmp3cxPN7GuYhB457kbGdz8EOSWJGwN+XmyCzXJWMPCPuQMkjIiO/BQPVTal012gISYDvVNu1zzXDQlcV/Hxtv5S88xpdACGqodXOAOLM5clHGVyqqmt9EONQ1GIjUyPfONQV3bedwK8tRwVquXfGKZFRMi68orQ6ErZ+aGRJWQZKYKR4QWRN+okB7AKwCozJ91yZNLP1cKISHP9h2haE+aAMxog4/NSOikSsHqzOcL6yU2kPkthEsiN5AhD1zzYTavJOUHK4NaMjWT14Sj+5BSf1Me70PQIDAQAB"
+
+
+
+/**
+ 适配宏
+ */
+#define ScreenMultiple  ([UIScreen mainScreen].bounds.size.width/375)
+
+/**
+ * UI常用
+ */
+#define NavigationBar_HEIGHT 44.0f
+#define Tabbar_HEIGHT 49.0f
+#define WIDTH [UIScreen mainScreen].bounds.size.width
+#define HEIGHT [UIScreen mainScreen].bounds.size.height
+
+//document路径
+#define DOCUMENTPATH [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0]
+#define kRect(_x, _y, _w, _h) CGRectMake((_x), (_y), (_w), (_h))
+#define ImageNamed(_name)     [UIImage imageNamed:_name]
+#endif /* PrefixHeader_pch */

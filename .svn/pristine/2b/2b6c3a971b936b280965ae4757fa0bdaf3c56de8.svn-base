@@ -1,0 +1,274 @@
+//
+//  AppDelegate.m
+//  HYSEM
+//
+//  Created by xlc on 16/11/15.
+//  Copyright © 2016年 WGM. All rights reserved.
+//
+
+#import "AppDelegate.h"
+#import "HYSocket.h"
+#import <AlipaySDK/AlipaySDK.h>
+#import "HYScoketManage.h"
+#import "DataBaseManager.h"
+#import "HYRightViewController.h"
+@interface AppDelegate ()
+{
+    HYSocket *_socket;
+}
+
+@property (nonatomic,strong) HYRootViewController *rootVC;
+@property (nonatomic,strong) HYLoginViewController *loginVC;
+
+
+@end
+
+@implementation AppDelegate
+
+
+- (BOOL)shouldAutorotate
+{
+    return NO;
+    
+}
+
+- (BOOL)application:(UIApplication *)application shouldAllowExtensionPointIdentifier:(NSString *)extensionPointIdentifier
+{
+    return NO;
+}
+
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations {
+    return UIInterfaceOrientationMaskPortrait;
+}
+
+- (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation
+{
+    return  UIInterfaceOrientationPortrait ;
+}
+
+
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    // Override point for customization after application launch.
+    self.window = [[UIWindow alloc]initWithFrame:[UIScreen mainScreen].bounds];
+    [self judgeExpired];
+    if ([[NSUserDefaults standardUserDefaults] objectForKey:@"AutoLogin"])
+    {
+        //已登陆，直接进入主页面
+        [self login];
+        
+    }else{
+        //否则，进入Login页面
+        [self login];
+        
+    }
+    [self aboutSqlite];
+    [self.window makeKeyWindow];
+    return YES;
+}
+
+#pragma mark - **************** 初始化数据库
+- (void)aboutSqlite
+{
+    DataBaseManager * manager = [DataBaseManager sharedDataBaseManager];
+    [manager createDatabase];
+    [manager createGoodsTable];
+}
+
+-(void)judgeExpired
+{
+    NSDate *currentDate = [NSDate date];//获取当前时间，日期
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    [dateFormatter setDateFormat:@"hh"];
+    NSString *date = [dateFormatter stringFromDate:currentDate];
+    NSInteger time = [date integerValue] - [[[NSUserDefaults standardUserDefaults] objectForKey:@"date"] integerValue];
+    if (time >= 0) {
+        //[[NSUserDefaults standardUserDefaults] setObject:nil forKey:@"AutoLogin"];
+        //NSLog(@"%ld...%@",(long)time,[[NSUserDefaults standardUserDefaults] objectForKey:@"date"]);
+    }
+}
+
+#pragma mark-  login
+- (void)login
+{
+    HYLoginViewController *login = [[HYLoginViewController alloc] init];
+    self.window.rootViewController = login;
+    //block
+    login.block = ^{
+        [self createRootViewController];
+    };
+}
+
+- (void)uninstall{
+    self.window.rootViewController = nil;
+}
+#pragma mark-  首页
+- (void)createRootViewController
+{
+    self.rootVC = [[HYRootViewController alloc]init];
+    HYLeftViewController *leftVC = [[HYLeftViewController alloc]init];
+    _drawerVC = [[MMDrawerController alloc]initWithCenterViewController:self.rootVC leftDrawerViewController:leftVC ];
+    _drawerVC.openDrawerGestureModeMask = MMOpenDrawerGestureModeAll;
+    _drawerVC.closeDrawerGestureModeMask = MMCloseDrawerGestureModeAll;
+    self.window.rootViewController = _drawerVC;
+    
+}
+
+- (void)applicationWillResignActive:(UIApplication *)application {
+    // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
+    // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
+}
+
+- (void)applicationDidEnterBackground:(UIApplication *)application {
+    
+    //进入后台,之后每10分钟发一次通知
+    [[UIApplication sharedApplication] setKeepAliveTimeout:600 handler:^{
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"CreateGcdSocket" object:nil userInfo:nil];
+        //如果需要添加NSTimer
+    }];
+    
+    // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
+    // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
+}
+
+- (void)applicationWillEnterForeground:(UIApplication *)application {
+    // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
+}
+
+- (void)applicationDidBecomeActive:(UIApplication *)application {
+    // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+}
+
+- (void)applicationWillTerminate:(UIApplication *)application {
+    // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+}
+
+
+- (BOOL)application:(UIApplication *)application
+            openURL:(NSURL *)url
+  sourceApplication:(NSString *)sourceApplication
+         annotation:(id)annotation {
+    
+    if ([url.host isEqualToString:@"safepay"]) {
+        // 支付跳转支付宝钱包进行支付，处理支付结果（）
+        //        [[AlipaySDK defaultService] processOrderWithPaymentResult:url standbyCallback:^(NSDictionary *resultDic) {
+        //            DLog(@"result = %@",resultDic);
+        //        }];
+        [[AlipaySDK defaultService] processOrderWithPaymentResult:url standbyCallback:^(NSDictionary *resultDic) {
+            DLog(@"result = %@",resultDic);
+            [self alipayResult:resultDic];
+        }];
+        
+        
+    }
+    return YES;
+}
+
+- (void)upLoadOrderWith:(NSString *)price
+{
+    NSArray *arr = [NSArray array];
+    if ([HY_NSusefDefaults objectForKey:@"payFee"]) {
+        arr = [HY_NSusefDefaults objectForKey:@"payFee"];
+    NSString * nodeID = arr[0];
+    NSString * fee = arr[1];
+    HYScoketManage * manegr = [HYScoketManage shareManager];
+    manegr.mpID = (UInt64)[nodeID longLongValue];
+    manegr.fee = fee;
+    [manegr getNetworkDatawithIP:[HY_NSusefDefaults objectForKey:@"IP"] withTag:@"7"];
+    }
+}
+
+// NOTE: 9.0以后使用新API接口（安装支付宝客户端调用的方法）
+- (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<NSString*, id> *)options
+{
+    if ([url.host isEqualToString:@"safepay"]) {
+        // 支付跳转支付宝钱包进行支付，处理支付结果（）
+        //        [[AlipaySDK defaultService] processOrderWithPaymentResult:url standbyCallback:^(NSDictionary *resultDic) {
+        //            DLog(@"result = %@",resultDic);
+        //        }];
+        [[AlipaySDK defaultService] processOrderWithPaymentResult:url standbyCallback:^(NSDictionary *resultDic) {
+            DLog(@"result = %@",resultDic);
+            [self alipayResult:resultDic];
+
+        }];
+        
+
+    }
+    return YES;
+}
+
+#pragma mark - **************** 处理支付宝支付
+- (void)alipayResult:(NSDictionary*)resultDic
+{
+    NSNumber *resultStatus = resultDic[@"resultStatus"];
+    if (9000 == [resultStatus integerValue])
+    {//支付成功
+        NSLog(@"支付成功__未安装回调__1111");
+        // 支付成功
+        //                CGRect rectLabel = CGRectMake((WIDTH - 150)/2, 150, 150, 50);
+        //                [Visitor_AppFunction showLabelWithFrame:rectLabel andTitle:@"充值成功" andComplete:^{
+        //
+        //                    AppDelegate *app = (AppDelegate *)[UIApplication sharedApplication].delegate;
+        //                    if (app.PaySuccessBlock) {
+        //                        app.PaySuccessBlock();
+        //                    }
+        //
+        //                }];
+        [self upLoadOrderWith:@"0.1"];
+        //                [UIView addMJNotifierWithText:@"支付成功" dismissAutomatically:YES];
+        //                [HY_NSusefDefaults setObject:nil forKey:@"orderID"];//订单支付成功，需重新生成
+        
+    }
+    else if (4000 == [resultStatus integerValue])
+    {//订单支付失败
+        NSLog(@"支付宝充值失败__%@",resultDic);
+        NSString *resultStr = resultDic[@"memo"];
+        if (!resultStr.length) {
+            resultStr = @"支付失败";
+        }
+        //支付失败，弹出支付宝返回的失败原因
+        //                [UIAlertView alertWithTitle:nil
+        //                                    message:resultStr
+        //                              cancelBtnName:@"确定"
+        //                              callBackBlock:nil];
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"payResult" object:@"Failed" userInfo:@{@"status":@"Failed"}];
+        [UIView addMJNotifierWithText:@"支付失败" dismissAutomatically:YES];
+    }
+    else if (6001 == [resultStatus integerValue])
+    {//用户中途取消
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"payResult" object:@"Failed" userInfo:@{@"status":@"Failed"}];
+        [UIView addMJNotifierWithText:@"支付失败" dismissAutomatically:YES];
+    }
+    else if (5000 == [resultStatus integerValue])
+    {//重复请求
+        [UIView addMJNotifierWithText:@"支付失败" dismissAutomatically:YES];
+    }
+    else if (6002 == [resultStatus integerValue])
+    {
+        //网络连接出错
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"payResult" object:@"Failed" userInfo:@{@"status":@"Failed"}];
+        [UIView addMJNotifierWithText:@"支付失败" dismissAutomatically:YES];
+    }
+    else if (8000 == [resultStatus integerValue])
+    {
+        //正在处理，结果未知（服务器请求异步通知支付结果）
+        //这里需要向服务器请求支付结果
+        [self upLoadOrderWith:@"0.1"];
+        [UIView addMJNotifierWithText:@"支付失败" dismissAutomatically:YES];
+    }
+    else if (6004 == [resultStatus integerValue])
+    {
+        //支付结果未知（服务器请求异步通知结果）
+        //这里需要向服务器请求支付结果
+        [self upLoadOrderWith:@"0.1"];
+        [UIView addMJNotifierWithText:@"支付失败" dismissAutomatically:YES];
+    }
+    else
+    {
+        //其他支付错误
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"payResult" object:@"Failed" userInfo:@{@"status":@"Failed"}];
+        [UIView addMJNotifierWithText:@"支付失败" dismissAutomatically:YES];
+    }
+
+}
+
+@end

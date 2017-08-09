@@ -1,0 +1,11 @@
+[core]
+	bare = false
+	filemode = true
+	ignorecase = true
+	precomposeunicode = true
+	logallrefupdates = true
+[core]
+	repositoryformatversion = 0
+[remote "origin"]
+	url = https://github.com/Happyybear/SEM.git
+	fetch = +refs/heads/*:refs/remotes/origin/*

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="11542" systemVersion="16B2657" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11524"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" id="KGk-i7-Jjw" customClass="UserCell">
+            <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="KGk-i7-Jjw" id="H2p-sc-9uM">
+                <rect key="frame" x="0.0" y="0.0" width="320" height="43.5"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ppj-MW-9u2">
+                        <rect key="frame" x="79" y="11.5" width="193" height="21"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="21" id="N9I-pp-oQM"/>
+                            <constraint firstAttribute="width" constant="193" id="h1g-um-0ZX"/>
+                        </constraints>
+                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                        <nil key="textColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="BlE-y6-oHj">
+                        <rect key="frame" x="293" y="8" width="27" height="28"/>
+                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="27" id="aTY-kz-heE"/>
+                            <constraint firstAttribute="height" constant="28" id="u4M-vU-CAh"/>
+                        </constraints>
+                        <state key="normal" image="fav_fileicon_xls90.png"/>
+                    </button>
+                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="zhh.png" translatesAutoresizingMaskIntoConstraints="NO" id="HJF-C8-Gqf">
+                        <rect key="frame" x="35" y="6.5" width="29" height="31"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="31" id="Di5-CW-FxM"/>
+                            <constraint firstAttribute="width" constant="29" id="mZw-nY-Lkh"/>
+                        </constraints>
+                    </imageView>
+                </subviews>
+                <constraints>
+                    <constraint firstItem="HJF-C8-Gqf" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="35" id="IWR-VF-HSi"/>
+                    <constraint firstItem="HJF-C8-Gqf" firstAttribute="centerY" secondItem="H2p-sc-9uM" secondAttribute="centerY" id="JJR-QH-NXZ"/>
+                    <constraint firstItem="Ppj-MW-9u2" firstAttribute="centerY" secondItem="H2p-sc-9uM" secondAttribute="centerY" id="JwM-xY-DSB"/>
+                    <constraint firstItem="Ppj-MW-9u2" firstAttribute="leading" secondItem="HJF-C8-Gqf" secondAttribute="trailing" constant="15" id="Kbm-Ba-h7R"/>
+                    <constraint firstAttribute="trailing" secondItem="BlE-y6-oHj" secondAttribute="trailing" id="LYq-tW-fiB"/>
+                    <constraint firstItem="BlE-y6-oHj" firstAttribute="centerY" secondItem="H2p-sc-9uM" secondAttribute="centerY" id="VCe-P0-pnb"/>
+                </constraints>
+            </tableViewCellContentView>
+            <connections>
+                <outlet property="deleteBtb" destination="BlE-y6-oHj" id="mbb-fG-gCC"/>
+                <outlet property="imageUser" destination="HJF-C8-Gqf" id="up9-a0-FPB"/>
+                <outlet property="userNameLabel" destination="Ppj-MW-9u2" id="b70-7F-O7N"/>
+            </connections>
+            <point key="canvasLocation" x="-754" y="23"/>
+        </tableViewCell>
+    </objects>
+    <resources>
+        <image name="fav_fileicon_xls90.png" width="45" height="45"/>
+        <image name="zhh.png" width="22" height="22"/>
+    </resources>
+</document>

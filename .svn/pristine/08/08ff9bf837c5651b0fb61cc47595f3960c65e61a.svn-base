@@ -1,0 +1,46 @@
+//
+//  ViewController.h
+//  IM
+//
+//  Created by 王一成 on 2017/4/10.
+//  Copyright © 2017年 Yicheng.Wang. All rights reserved.
+//
+
+
+#import <Foundation/Foundation.h>
+#import "Order.h"
+@interface PaymentMethod : NSObject
+
+/**
+ *上传订单信息到服务器
+ *
+ **/
+@property (nonatomic,copy) void(^upLoadOrderToSrvice)(NSString * fee);
+
++ (PaymentMethod *)sharedInstance;
+/**
+ *  支付宝支付
+ */
+- (NSString *)generateTradeNO;
+- (NSString *)getTradeNO;
+- (Order *)doAlipayPayWith:(NSString *)price orderID:(NSString *)orderID;
+- (void)myAlipayWithPartnerID:(NSString *)partnerID
+                     sellerID:(NSString *)sellerID
+                      TradeNO:(NSString *)tradeNO
+                  ProductName:(NSString *)productName
+           productDescription:(NSString *)productDescription
+                       Amount:(float)amount
+                    notifyURL:(NSString *)notifyUrl;
+- (void)payAlipayWith:(NSString *)signedString andOrder:(Order *)order;
+/**
+ *  微信支付
+ */
+- (void)myWxPayWithOpenID:(NSString *)openID
+                partnerID:(NSString *)partnerID
+                 prepayID:(NSString *)prepayID
+                 nonceStr:(NSString *)nonceStr
+                timeStamp:(NSString *)timeStamp
+                  package:(NSString *)package
+                     sign:(NSString *)sign;
+
+@end

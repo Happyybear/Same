@@ -1,0 +1,27 @@
+//
+//  UserCell.m
+//  HYSEM
+//
+//  Created by 王一成 on 2017/6/23.
+//  Copyright © 2017年 WGM. All rights reserved.
+//
+
+#import "UserCell.h"
+
+@implementation UserCell
+
+- (void)awakeFromNib {
+    [super awakeFromNib];
+    // Initialization code
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    [super setSelected:selected animated:animated];
+
+    // Configure the view for the selected state
+}
+- (IBAction)delete:(id)sender {
+    self.deletUser(self.userNameLabel.text);
+}
+
+@end

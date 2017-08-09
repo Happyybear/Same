@@ -1,0 +1,146 @@
+//
+//  SendMessageToWarningViewController.m
+//  HYSEM
+//
+//  Created by 王一成 on 2017/6/20.
+//  Copyright © 2017年 WGM. All rights reserved.
+//
+
+#import "SendMessageToWarningViewController.h"
+
+#import "HYScoketManage.h"
+
+@interface SendMessageToWarningViewController()<UITextViewDelegate>
+
+@property (nonatomic,strong) UITextView * textView;
+@property (nonatomic,strong) UILabel * placeLabel;
+@property (nonatomic,strong) UILabel * personLabel;
+//@property (nonatomic,strong)
+
+@end
+
+@implementation SendMessageToWarningViewController
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    [self createNavigition];
+    [self configUI];
+    self.view.backgroundColor = [UIColor whiteColor];
+}
+
+
+- (void)createNavigition
+{
+    self.titleLabel.text = @"短信提醒";
+    [self.leftButton setImage:[UIImage imageNamed:@"back"] forState:UIControlStateNormal];
+    [self setLeftButtonClick:@selector(leftButtonClick)];
+    
+}
+
+#pragma mark - **************** 返回上一级
+- (void)leftButtonClick
+{
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
+- (void)configUI
+{
+    self.textView = [[UITextView alloc] initWithFrame:CGRectMake(5*ScreenMultiple, 5*ScreenMultiple, SCREEN_W-10*ScreenMultiple, 200*ScreenMultiple)];
+    self.textView.delegate = self;
+    self.textView.textColor = [UIColor blackColor];
+    self.textView.textContainerInset = UIEdgeInsetsMake(25*ScreenMultiple, 25*ScreenMultiple, 25*ScreenMultiple, 25*ScreenMultiple);
+    self.textView.font = [UIFont systemFontOfSize:18.f];
+    self.textView.backgroundColor = [UIColor whiteColor];
+    self.textView.layer.borderColor = [[UIColor grayColor] CGColor];
+    self.textView.layer.borderWidth = 1;
+    self.textView.text = @"🐷🐷尊敬的用户，您的账户余额已不足，请及时处理。";
+    self.textView.contentInset = UIEdgeInsetsMake(20*ScreenMultiple, 0, 0, 0);
+    //占位label
+    self.placeLabel = [[UILabel alloc] initWithFrame:CGRectMake(20*ScreenMultiple, 20*ScreenMultiple, SCREEN_W-10*ScreenMultiple, 40*ScreenMultiple)];
+    self.placeLabel.text = @"输入相关信息";
+//    [self.textView addSubview:self.placeLabel];
+    [self.view addSubview:self.textView];
+    [self addMessageP];
+    [self addBtn];
+}
+
+#pragma mark - **************** delegate
+
+-(void)textViewDidBeginEditing:(UITextView *)textView
+{
+    [self.textView becomeFirstResponder];
+    self.placeLabel.alpha = 0;
+}
+-(void)textViewDidChange:(UITextView *)textView
+{
+    self.placeLabel.alpha = 0;
+}
+#pragma mark - **************** 联系人
+- (void)addMessageP{
+    _personLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, -20, SCREEN_W, 40*ScreenMultiple)];
+    _personLabel.backgroundColor = RGB(248, 248, 248);
+    _personLabel.textColor = [UIColor blackColor];
+    if (self.messageModel.messageArr.count > 0) {
+        NSDictionary *attributeDict = [NSDictionary dictionaryWithObjectsAndKeys:
+                                       [UIFont systemFontOfSize:15.0],NSFontAttributeName,
+                                       RGB(172, 172, 175),NSForegroundColorAttributeName,
+                                       nil];
+        NSString * string = [NSString stringWithFormat:@" 联系人:  %@",self.messageModel.messageArr[0]];
+        NSMutableAttributedString * AttString = [[NSMutableAttributedString alloc] initWithString:string];
+        [AttString setAttributes:attributeDict range:NSMakeRange(0, 4)];
+        _personLabel.attributedText = AttString;
+    }else{
+        _personLabel.text = @"暂无联系信息";
+    }
+    _personLabel.textAlignment = NSTextAlignmentLeft;
+    [self.textView addSubview:_personLabel];
+}
+
+#pragma mark -8**********取消确认
+-(void)addBtn{
+    UIButton *btn = [[UIButton alloc]initWithFrame:CGRectMake(20*ScreenMultiple, CGRectGetMaxY(self.textView.frame) +10*ScreenMultiple, 110*ScreenMultiple, 30*ScreenMultiple)];
+    btn.selected = YES;
+    [btn setTitle:@"取消" forState:UIControlStateNormal];
+    btn.layer.cornerRadius = 5;
+    [self.view addSubview:btn];
+    [btn setBackgroundColor:[UIColor colorWithRed:255/255.0 green:102/255.0 blue:102/255.0 alpha:1.0]];
+    [btn addTarget:self action:@selector(cancle:) forControlEvents:UIControlEventTouchUpInside];
+    
+    UIButton *btn1 = [[UIButton alloc]initWithFrame:CGRectMake(SCREEN_W - 20*ScreenMultiple-110*ScreenMultiple, 10*ScreenMultiple+CGRectGetMaxY(self.textView.frame), 110*ScreenMultiple, 30*ScreenMultiple)];
+    [btn1 setTitle:@"确认" forState:UIControlStateNormal];
+    btn1.layer.cornerRadius = 5;
+    [btn1 setBackgroundColor:[UIColor colorWithRed:46/255.0 green:149/255.0 blue:250/255.0 alpha:1.0]];
+    [self.view addSubview:btn1];
+    [btn1 addTarget:self action:@selector(commit) forControlEvents:UIControlEventTouchUpInside];
+}
+
+#pragma mark - **************** commot
+- (void)commit
+{
+    if (_textView.text.length <= 0) {
+        [UIView addMJNotifierWithText:@"信息不能为空" dismissAutomatically:YES];
+        return;
+    }
+    if (self.messageModel.messageArr.count >0) {
+        NSString * phoneNum = self.messageModel.messageArr[0];
+        if (phoneNum.length == 11) {
+            self.messageModel.messageLen = (int)_textView.text.length;
+            self.messageModel.message = _textView.text;
+            HYScoketManage * manager = [HYScoketManage shareManager];
+            [manager getNetworkDatawithIP:SocketHOST withTag:@"message"];
+            [manager writeMessageDataToHostWith:self.messageModel];
+
+        }else{
+            [UIView addMJNotifierWithText:@"短信号码格式不对" dismissAutomatically:YES];
+        }
+    }else{
+        [UIView addMJNotifierWithText:@"没有联系方式" dismissAutomatically:YES];
+    }
+
+}
+
+-(void)cancle:(UIButton *)btn{
+    [self.navigationController popViewControllerAnimated:YES];
+}
+@end
